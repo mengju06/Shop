@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Shop.DataAccess.Repository.IRepository;
 using Shop.Models;
 using Shop.Utility;
 
@@ -35,6 +36,7 @@ namespace Shop.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IUnitOfWork _unitOfWork;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -42,7 +44,8 @@ namespace Shop.Areas.Identity.Pages.Account
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUnitOfWork unitOfWork)
         {
             _roleManager = roleManager;
             _userManager = userManager;
@@ -51,6 +54,7 @@ namespace Shop.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -103,6 +107,8 @@ namespace Shop.Areas.Identity.Pages.Account
             public string Name {  get; set; }
             public string? Address { get; set; }
             public string? PhoneNumber {  get; set; }
+            public int? StoreId { get; set; }
+            public IEnumerable<SelectListItem> StoreList { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -131,6 +137,11 @@ namespace Shop.Areas.Identity.Pages.Account
                 {
                     Text = i,
                     Value = i
+                }),
+                StoreList = _unitOfWork.Store.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
                 })
             };
             ReturnUrl = returnUrl;
@@ -151,6 +162,10 @@ namespace Shop.Areas.Identity.Pages.Account
                 user.Name = Input.Name;
                 user.Address = Input.Address;
                 user.PhoneNumber = Input.PhoneNumber;
+                if(Input.Role == SD.Role_Employee || Input.Role == SD.Role_Manager)
+                {
+                    user.StoreId = Input.StoreId;
+                }
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

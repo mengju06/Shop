@@ -12,8 +12,8 @@ using Shop.DataAccess.Data;
 namespace Shop.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250323124930_UpdateNameToBeStringApplicationUser")]
-    partial class UpdateNameToBeStringApplicationUser
+    [Migration("20250323212634_AddCategoryAndProductToDbAndSeedTable")]
+    partial class AddCategoryAndProductToDbAndSeedTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
